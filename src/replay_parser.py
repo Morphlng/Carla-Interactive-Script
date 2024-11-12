@@ -379,7 +379,7 @@ class Frame:
 
 class Replay:
     def __init__(self, client: carla.Client, filepath: str, lazy_init: bool = True):
-        """Parse one replay file
+        """Parse a Carla replay file
 
         Args:
             client (carla.Client): The client to connect to the server
@@ -415,14 +415,14 @@ class Replay:
     def duration(self) -> float:
         """Total duration of the replay file in seconds"""
         if self._duration is None:
-            self._parse_duration()
+            self._duration = self._parse_duration()
         return self._duration
 
     @property
     def map_name(self) -> str:
         """Map name of the replay file"""
         if self._map_name is None:
-            self._parse_map()
+            self._map_name = self._parse_map()
         return self._map_name
 
     @property
@@ -478,6 +478,10 @@ class Replay:
         if self._frame_info is None:
             self._frame_info = self._parse_frame_info()
         return self._frame_info
+
+    def run(self, start, duration, follow_id):
+        """Run the replay file in the simulator"""
+        return self.client.replay_file(self.filepath, start, duration, follow_id)
 
     def get_frame(self, frame_id: int) -> Frame:
         """Get frame by its id
@@ -704,9 +708,9 @@ class Replay:
         # Define the patterns
         frame_info_pattern = r"Frame (\d+) at ([\d\.]+) seconds"
         collision_pattern = (r"Collision id \d+ between (\d+)(?: \(hero\))? +with +(\d+)(?: \(hero\))?")
-        transform_pattern = r"Id: (\d+) Location: \((.*?)\) Rotation \((.*?)\)"
+        transform_pattern = r"Id: (\d+) Location: \((.*?)\) Rotation: \((.*?)\)"
         traffic_light_pattern = r"Id: (\d+) state: (\d+) frozen: (\d+) elapsedTime: ([\d\.]+)"
-        vehicle_pattern = r"Id: (\d+) Steering: ([\d\.]+) Throttle: ([\d\.]+) Brake ([\d\.]+) Handbrake: ([\d\.]+) Gear: (\d+)(?: \w+)*"
+        vehicle_pattern = r"Id: (\d+) Steering: ([\d\.]+) Throttle: ([\d\.]+) Brake: ([\d\.]+) Handbrake: ([\d\.]+) Gear: (\d+)(?: \w+)*"
         walker_pattern = r"Id: (\d+) speed: ([\d\.]+)"
 
         for frame_info, frame in zip(frames[::2], frames[1::2]):
