@@ -379,7 +379,7 @@ class Frame:
 
 class Replay:
     def __init__(self, client: carla.Client, filepath: str, lazy_init: bool = True):
-        """Parse one replay file
+        """Parse a Carla replay file
 
         Args:
             client (carla.Client): The client to connect to the server
@@ -415,14 +415,14 @@ class Replay:
     def duration(self) -> float:
         """Total duration of the replay file in seconds"""
         if self._duration is None:
-            self._parse_duration()
+            self._duration = self._parse_duration()
         return self._duration
 
     @property
     def map_name(self) -> str:
         """Map name of the replay file"""
         if self._map_name is None:
-            self._parse_map()
+            self._map_name = self._parse_map()
         return self._map_name
 
     @property
@@ -478,6 +478,10 @@ class Replay:
         if self._frame_info is None:
             self._frame_info = self._parse_frame_info()
         return self._frame_info
+
+    def run(self, start, duration, follow_id):
+        """Run the replay file in the simulator"""
+        return self.client.replay_file(self.filepath, start, duration, follow_id)
 
     def get_frame(self, frame_id: int) -> Frame:
         """Get frame by its id
